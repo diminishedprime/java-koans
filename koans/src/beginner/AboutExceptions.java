@@ -22,7 +22,7 @@ public class AboutExceptions {
         } catch (IOException e) {
             s = "exception thrown";
         }
-        assertEquals(s, __);
+        assertEquals(s, "exception thrown");
     }
 
     @Koan
@@ -36,7 +36,7 @@ public class AboutExceptions {
         } finally {
             s += " and finally ran as well";
         }
-        assertEquals(s, __);
+        assertEquals(s, "exception thrown and finally ran as well");
     }
 
     @Koan
@@ -47,7 +47,7 @@ public class AboutExceptions {
         } finally {
             s += " and finally ran as well";
         }
-        assertEquals(s, __);
+        assertEquals(s, "code ran normally and finally ran as well");
     }
 
     private void tryCatchFinallyWithVoidReturn(StringBuilder whatHappened) {
@@ -66,7 +66,7 @@ public class AboutExceptions {
     public void finallyIsAlwaysRan() {
         StringBuilder whatHappened = new StringBuilder();
         tryCatchFinallyWithVoidReturn(whatHappened);
-        assertEquals(whatHappened.toString(), __);
+        assertEquals(whatHappened.toString(), "did something dangerous; the catch block executed, but so did the finally!");
     }
 
     @SuppressWarnings("finally")
@@ -91,8 +91,8 @@ public class AboutExceptions {
     public void returnInFinallyBlock() {
         StringBuilder whatHappened = new StringBuilder();
         // Which value will be returned here?
-        assertEquals(returnStatementsEverywhere(whatHappened), __);
-        assertEquals(whatHappened.toString(), __);
+        assertEquals(returnStatementsEverywhere(whatHappened), "from finally");
+        assertEquals(whatHappened.toString(), "try, catch, finally");
     }
 
     private void doUncheckedStuff() {
@@ -102,65 +102,69 @@ public class AboutExceptions {
     @Koan
     public void catchUncheckedExceptions() {
         // What do you need to do to catch the unchecked exception?
-        doUncheckedStuff();
+        try {
+            doUncheckedStuff();
+        } catch (RuntimeException e) {
+        }
+
     }
 
     @SuppressWarnings("serial")
-    static class ParentException extends Exception {
-    }
+static class ParentException extends Exception {
+}
 
-    @SuppressWarnings("serial")
-    static class ChildException extends ParentException {
-    }
+@SuppressWarnings("serial")
+static class ChildException extends ParentException {
+}
 
-    private void throwIt() throws ParentException {
-        throw new ChildException();
+private void throwIt() throws ParentException {
+    throw new ChildException();
+}
+
+@Koan
+public void catchOrder() {
+    String s = "";
+    try {
+        throwIt();
+    } catch (ChildException e) {
+        s = "ChildException";
+    } catch (ParentException e) {
+        s = "ParentException";
+    }
+    assertEquals(s, "ChildException");
+}
+
+    @Koan
+public void failArgumentValidationWithAnIllegalArgumentException() {
+    // This koan demonstrates the use of exceptions in argument validation
+    String s = "";
+    try {
+        s += validateUsingIllegalArgumentException(null);
+    } catch (IllegalArgumentException ex) {
+        s = "caught an IllegalArgumentException";
+    }
+    assertEquals(s, "caught an IllegalArgumentException");
     }
 
     @Koan
-    public void catchOrder() {
-        String s = "";
-        try {
-            throwIt();
-        } catch (ChildException e) {
-            s = "ChildException";
-        } catch (ParentException e) {
-            s = "ParentException";
-        }
-        assertEquals(s, __);
+public void passArgumentValidationWithAnIllegalArgumentException() {
+    // This koan demonstrates the use of exceptions in argument validation
+    String s = "";
+    try {
+        s += validateUsingIllegalArgumentException("valid");
+    } catch (IllegalArgumentException ex) {
+        s = "caught an IllegalArgumentException";
     }
-
-    @Koan
-    public void failArgumentValidationWithAnIllegalArgumentException() {
-        // This koan demonstrates the use of exceptions in argument validation
-        String s = "";
-        try {
-            s += validateUsingIllegalArgumentException(null);
-        } catch (IllegalArgumentException ex) {
-            s = "caught an IllegalArgumentException";
-        }
-        assertEquals(s, __);
-    }
-
-    @Koan
-    public void passArgumentValidationWithAnIllegalArgumentException() {
-        // This koan demonstrates the use of exceptions in argument validation
-        String s = "";
-        try {
-            s += validateUsingIllegalArgumentException("valid");
-        } catch (IllegalArgumentException ex) {
-            s = "caught an IllegalArgumentException";
-        }
-        assertEquals(s, __);
+    assertEquals(s, "5");
     }
 
     private int validateUsingIllegalArgumentException(String str) {
-        // This is effective and both the evaluation and the error message
-        // can be tailored which can be particularly handy if you're guarding
-        // against more than null values
-        if (null == str) {
-            throw new IllegalArgumentException("str should not be null");
-        }
-        return str.length();
+    // This is effective and both the evaluation and the error message
+    // can be tailored which can be particularly handy if you're guarding
+    // against more than null values
+    if (null == str) {
+        throw new IllegalArgumentException("str should not be null");
     }
+    return str.length();
+}
 }
